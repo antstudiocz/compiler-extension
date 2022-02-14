@@ -4,7 +4,7 @@ namespace Adeira;
 
 use Nette;
 
-class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExtension
+class ConfigurableExtensionsExtension extends \Nette\DI\CompilerExtension
 {
 
 	private $experimental;
@@ -14,9 +14,9 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 		$this->experimental = $experimental;
 	}
 
-	public function loadFromFile($file)
+	public function loadFromFile(string $file): array
 	{
-		$loader = new \Nette\DI\Config\Loader;
+		$loader = new Nette\DI\Config\Loader();
 		if ($this->experimental === TRUE) {
 			$loader->addAdapter('neon', GroupedNeonAdapter::class);
 		}
@@ -30,8 +30,10 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 		$ceeConfig = $this->getConfig(); // configuration of this extension (list of extensions)
 
 		foreach ($ceeConfig as $name => $class) {
-			if ($class instanceof Nette\DI\Statement) {
+			if ($class instanceof Nette\DI\Definitions\Statement) {
 				$rc = new \ReflectionClass($class->getEntity());
+                var_dump($rc);
+//                die();
 				$this->compiler->addExtension($name, $extension = $rc->newInstanceArgs($class->arguments));
 			} else {
 				$this->compiler->addExtension($name, $extension = new $class);
@@ -111,8 +113,8 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 				$res[$key] = self::expand($val, $params, $recursive);
 			}
 			return $res;
-		} elseif ($var instanceof Nette\DI\Statement) {
-			return new Nette\DI\Statement(
+		} elseif ($var instanceof Nette\DI\Definitions\Statement) {
+			return new Nette\DI\Definitions\Statement(
 				self::expand($var->getEntity(), $params, $recursive),
 				self::expand($var->arguments, $params, $recursive)
 			);
@@ -156,5 +158,10 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 		}
 		return $res;
 	}
+
+    public function getConfigSchema(): Nette\Schema\Schema
+    {
+        return Nette\Schema\Expect::arrayOf('string|Nette\DI\Definitions\Statement');
+    }
 
 }
