@@ -113,10 +113,10 @@ class CompilerExtension extends \Tester\TestCase
 			'Nette\\Application\\Routers\\RouteList',
 			'Adeira\\Tests\\CommandsStack',
 			'Adeira\\Tests\\Definition',
-			'Adeira\\Tests\\Service2', //overridden (named service)
-			'Adeira\\Tests\\Service4', //registered in config.neon
-			'Adeira\\Tests\\Service5', //registered later in extension
-			'Adeira\\Tests\\Service3', //registered later in extension
+			'Adeira\\Tests\\Service4', // registered in config.neon
+			'Adeira\\Tests\\Service2', //overridden (named service) in CustomExtension1
+			'Adeira\\Tests\\Service3', //registered later in extension in CustomExtension3
+			'Adeira\\Tests\\Service5', //registered later in extension in CustomExtension1
 			'Nette\\DI\\Container',
 		], array_map(function (\Nette\DI\ServiceDefinition $item) {
 			return $item->getFactory()->getEntity();
