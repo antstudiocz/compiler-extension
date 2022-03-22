@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   tests:
     name: PHP ${{ matrix.php }}
-    runs-on: ubuntu-latest
+    runs-on: macos-11
 
 #    env:
 #      RUNLEVEL: 0
@@ -21,16 +21,16 @@ jobs:
           coverage: none
 
       - run: composer selfupdate 1.10.25 --no-progress
-      - run: composer install --prefer-dist
+      - run: composer install
       - run: vendor/bin/phpcs --standard=ruleset.xml --extensions=php --encoding=utf-8 --tab-width=4 -sp src/ --ignore=bootstrap.php
       - run: vendor/bin/phpcs --standard=ruleset.xml --extensions=php,phpt --encoding=utf-8 --tab-width=4 -sp tests/
       - run: vendor/bin/parallel-lint . -e php,php3,php4,php5,phtml,phpt --exclude vendor --blame
       - run: vendor/bin/tester tests -C
-      - if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: output
-          path: tests/**/output
+#      - if: failure()
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: output
+#          path: tests/**/output
 
 
 
