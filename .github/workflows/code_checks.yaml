@@ -5,8 +5,8 @@ jobs:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
 
-    env:
-      RUNLEVEL: 0
+#    env:
+#      RUNLEVEL: 0
 
     strategy:
       matrix:
