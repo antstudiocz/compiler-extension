@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Adeira;
 
@@ -32,7 +34,7 @@ class ConfigurableExtensionsExtension extends \Nette\DI\CompilerExtension
 		foreach ($ceeConfig as $name => $class) {
 			if ($class instanceof Nette\DI\Definitions\Statement) {
 				$rc = new \ReflectionClass($class->getEntity());
-                var_dump($rc);
+				var_dump($rc);
 //                die();
 				$this->compiler->addExtension($name, $extension = $rc->newInstanceArgs($class->arguments));
 			} else {
@@ -159,9 +161,9 @@ class ConfigurableExtensionsExtension extends \Nette\DI\CompilerExtension
 		return $res;
 	}
 
-    public function getConfigSchema(): Nette\Schema\Schema
-    {
-        return Nette\Schema\Expect::arrayOf('string|Nette\DI\Definitions\Statement');
-    }
+	public function getConfigSchema(): Nette\Schema\Schema
+	{
+		return Nette\Schema\Expect::arrayOf('string|Nette\DI\Definitions\Statement');
+	}
 
 }

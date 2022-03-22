@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        php: ['8.1', '8.0', '7.4']
+        php: ['8.1', '8.0']
       fail-fast: false
 
     steps:
@@ -23,6 +23,7 @@ jobs:
       - run: composer selfupdate 1.10.25 --no-progress
       - run: composer install --prefer-dist
       - run: vendor/bin/tester tests -C
+      - run: vendor/bin/phpcs --standard=ruleset.xml --extensions=php --encoding=utf-8 --tab-width=4 -sp src/ --ignore=bootstrap.php
       - if: failure()
         uses: actions/upload-artifact@v2
         with:
