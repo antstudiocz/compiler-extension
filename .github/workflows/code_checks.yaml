@@ -21,10 +21,8 @@ jobs:
           coverage: none
 
       - run: composer selfupdate 1.10.25 --no-progress
-      - run: composer install --no-progress --prefer-dist --ignore-platform-reqs
-      - run: mkdir tests/_temp
-      - run: cp tests/_helpers/mysql.neon tests/tests.local.neon
-      - run: src/run-tests --bootstrap tests/bootstrap.php
+      - run: composer install --prefer-dist
+      - run: vendor/bin/tester tests -C
       - if: failure()
         uses: actions/upload-artifact@v2
         with:
