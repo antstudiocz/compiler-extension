@@ -1,0 +1,35 @@
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    env:
+      RUNLEVEL: 0
+
+    strategy:
+      matrix:
+        php: ['8.1', '8.0', '7.4']
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - run: composer selfupdate 1.10.25 --no-progress
+      - run: composer install --no-progress --prefer-dist --ignore-platform-reqs
+      - run: mkdir tests/_temp
+      - run: cp tests/_helpers/mysql.neon tests/tests.local.neon
+      - run: src/run-tests --bootstrap tests/bootstrap.php
+      - if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: output
+          path: tests/**/output
+
+
+
