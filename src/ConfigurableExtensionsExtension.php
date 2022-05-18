@@ -75,26 +75,31 @@ class ConfigurableExtensionsExtension extends CompilerExtension
                 }
 
 				if (isset($extensionConfig['services'])) {
-                    /** @var Nette\DI\Definitions\Statement $service */
-                    foreach ($extensionConfig['services'] as $serviceIndex => $service) {
-                        $updateService = FALSE;
-                        $arguments = [];
-                        if (is_array($service)) {
-                            $arguments = $service['arguments'] ?? [];
-                        } elseif (is_object($service)) {
-                            $arguments = $service->arguments ?? [];
-                        }
-                        foreach ($arguments as $argument) {
-                            if (is_string($argument) && Nette\Utils\Strings::match($argument, '~^%%.*%%$~')) {
-                                $updateService = TRUE;
-                                break;
-                            }
-                        }
-                        if ($updateService) {
-                            $extension->addDefinitionToResolve($serviceIndex, $service);
-                            unset($extensionConfig['services'][$serviceIndex]);
-                        }
-                    }
+					/** @var Nette\DI\Definitions\Statement $service */
+					foreach ($extensionConfig['services'] as $serviceIndex => $service) {
+						$updateService = FALSE;
+						$arguments = [];
+						if (is_array($service)) {
+							$arguments = $service['arguments'] ?? [];
+						} elseif (is_object($service)) {
+							$arguments = $service->arguments ?? [];
+						}
+						foreach ($arguments as $argument) {
+							if (is_string($argument) && Nette\Utils\Strings::match($argument, '~^%%.*%%$~')) {
+								$updateService = TRUE;
+								break;
+							}
+						}
+						if ($updateService) {
+							if (method_exists($extension, 'addDefinitionToResolve')) {
+								$extension->addDefinitionToResolve($serviceIndex, $service);
+								unset($extensionConfig['services'][$serviceIndex]);
+							} else {
+								$text = "Method 'addDefinitionToResolve' does not exist. Use Adeira\\CompilerExtension for {$name}";
+								throw new \BadMethodCallException($text);
+							}
+						}
+					}
 				}
 
 				$this->compiler->addConfig($extensionConfig);
