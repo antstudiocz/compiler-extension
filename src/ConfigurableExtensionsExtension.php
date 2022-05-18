@@ -13,7 +13,7 @@ class ConfigurableExtensionsExtension extends CompilerExtension
 
 	public function __construct($experimental = FALSE)
 	{
-        $this->experimental = $experimental;
+		$this->experimental = $experimental;
 	}
 
 	public function loadFromFile(string $file): array
@@ -30,18 +30,18 @@ class ConfigurableExtensionsExtension extends CompilerExtension
 	public function loadConfiguration()
 	{
 		$ceeConfig = $this->getConfig(); // configuration of this extension (list of extensions)
-        foreach ($ceeConfig as $name => $class) {
-            $name = is_int($name) ? NULL : $name;
-            if (($class->arguments[0] ?? NULL) instanceof Nette\DI\CompilerExtension) {
-                $extension = $class->arguments[0];
-            } elseif ($class instanceof Nette\DI\Definitions\Statement) {
-                $rc = new \ReflectionClass($class->getEntity());
-                $extension = $rc->newInstanceArgs($class->arguments);
-            } else {
-                /** @var Nette\DI\CompilerExtension $extension */
-                $extension = new $class;
-            }
-            $this->compiler->addExtension($name, $extension);
+		foreach ($ceeConfig as $name => $class) {
+			$name = is_int($name) ? NULL : $name;
+			if (($class->arguments[0] ?? NULL) instanceof Nette\DI\CompilerExtension) {
+				$extension = $class->arguments[0];
+			} elseif ($class instanceof Nette\DI\Definitions\Statement) {
+				$rc = new \ReflectionClass($class->getEntity());
+				$extension = $rc->newInstanceArgs($class->arguments);
+			} else {
+				/** @var Nette\DI\CompilerExtension $extension */
+				$extension = new $class;
+			}
+			$this->compiler->addExtension($name, $extension);
 
 			$builder = $this->getContainerBuilder();
 			$extensionConfigFile = FALSE;
@@ -50,7 +50,11 @@ class ConfigurableExtensionsExtension extends CompilerExtension
 			}
 
 			if ($extensionConfigFile) {
-                $extensionsExtensions = array_key_exists('extensions', $this->compiler->getExtensions()) ? ['extensions'] : array_keys($this->compiler->getExtensions(\Nette\DI\Extensions\ExtensionsExtension::class));
+				if (array_key_exists('extensions', $this->compiler->getExtensions())) {
+					$extensionsExtensions = ['extensions'];
+				} else {
+					$extensionsExtensions = array_keys($this->compiler->getExtensions(\Nette\DI\Extensions\ExtensionsExtension::class));
+				}
 				if (is_array($extensionConfigFile)) {
 					$extensionConfig = $extensionConfigFile;
 				} elseif (is_file($extensionConfigFile)) {
@@ -72,36 +76,8 @@ class ConfigurableExtensionsExtension extends CompilerExtension
 						\Nette\DI\Helpers::expand($extensionConfig['parameters'], $extensionConfig['parameters'], TRUE),
 						$builder->parameters
 					);
-                }
-
-				if (isset($extensionConfig['services'])) {
-					/** @var Nette\DI\Definitions\Statement $service */
-					foreach ($extensionConfig['services'] as $serviceIndex => $service) {
-						$updateService = FALSE;
-						$arguments = [];
-						if (is_array($service)) {
-							$arguments = $service['arguments'] ?? [];
-						} elseif (is_object($service)) {
-							$arguments = $service->arguments ?? [];
-						}
-						foreach ($arguments as $argument) {
-							if (is_string($argument) && Nette\Utils\Strings::match($argument, '~^%%.*%%$~')) {
-								$updateService = TRUE;
-								break;
-							}
-						}
-						if ($updateService) {
-							if (method_exists($extension, 'addDefinitionToResolve')) {
-								$extension->addDefinitionToResolve($serviceIndex, $service);
-								unset($extensionConfig['services'][$serviceIndex]);
-							} else {
-								$text = "Method 'addDefinitionToResolve' does not exist. Use Adeira\\CompilerExtension for {$name}";
-								throw new \BadMethodCallException($text);
-							}
-						}
-					}
 				}
-
+				$extensionConfig = $this->resolveServicesParameters($extensionConfig, $extension, $name);
 				$this->compiler->addConfig($extensionConfig);
 			}
 		}
@@ -109,12 +85,9 @@ class ConfigurableExtensionsExtension extends CompilerExtension
 
 	/**
 	 * Expands %%placeholders%%
-	 *
 	 * @return mixed
-	 *
 	 * @throws Nette\InvalidArgumentException
 	 * @throws Nette\OutOfRangeException
-	 *
 	 * This is basically copy of \Nette\DI\Helpers::expand
 	 */
 	public static function expand($var, array $params, $recursive = FALSE)
@@ -136,7 +109,7 @@ class ConfigurableExtensionsExtension extends CompilerExtension
 
 		$parts = preg_split('#%%([\w.-]*)%%#i', $var, -1, PREG_SPLIT_DELIM_CAPTURE);
 		$res = '';
-        foreach ($parts as $n => $part) {
+		foreach ($parts as $n => $part) {
 			if ($n % 2 === 0) {
 				$res .= $part;
 			} elseif ($part === '') {
@@ -174,6 +147,44 @@ class ConfigurableExtensionsExtension extends CompilerExtension
 	public function getConfigSchema(): Nette\Schema\Schema
 	{
 		return Nette\Schema\Expect::arrayOf('string|Nette\DI\Definitions\Statement');
+	}
+
+	/**
+	 * @param array $extensionConfig
+	 * @param $extension
+	 * @param $name
+	 * @return array
+	 */
+	public function resolveServicesParameters(array $extensionConfig, $extension, $name): array
+	{
+		if (isset($extensionConfig['services'])) {
+			/** @var Nette\DI\Definitions\Statement $service */
+			foreach ($extensionConfig['services'] as $serviceIndex => $service) {
+				$updateService = FALSE;
+				$arguments = [];
+				if (is_array($service)) {
+					$arguments = $service['arguments'] ?? [];
+				} elseif (is_object($service)) {
+					$arguments = $service->arguments ?? [];
+				}
+				foreach ($arguments as $argument) {
+					if (is_string($argument) && Nette\Utils\Strings::match($argument, '~^%%.*%%$~')) {
+						$updateService = TRUE;
+						break;
+					}
+				}
+				if ($updateService) {
+					if (method_exists($extension, 'addDefinitionToResolve')) {
+						$extension->addDefinitionToResolve($serviceIndex, $service);
+						unset($extensionConfig['services'][$serviceIndex]);
+					} else {
+						$text = "Method 'addDefinitionToResolve' does not exist. Use Adeira\\CompilerExtension for {$name}";
+						throw new \BadMethodCallException($text);
+					}
+				}
+			}
+		}
+		return $extensionConfig;
 	}
 
 }
