@@ -25,7 +25,7 @@ class ExtensionsManipulation extends \Tester\TestCase
 		$compiler->addExtension('extensions', new \Adeira\ConfigurableExtensionsExtension);
 		$compiler->addConfig([
 			'extensions' => [
-                new Statement(Reference::class, [new class extends \Nette\DI\CompilerExtension {
+				new Statement(Reference::class, [new class extends \Nette\DI\CompilerExtension {
 
 					public function provideConfig()
 					{

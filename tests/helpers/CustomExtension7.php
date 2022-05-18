@@ -10,9 +10,9 @@ use Tester\FileMock;
 class CustomExtension7 extends \Nette\DI\CompilerExtension
 {
 
-    public function provideConfig()
-    {
-        $config = <<<CONFIG
+	public function provideConfig()
+	{
+		$config = <<<CONFIG
 services:
 	- Adeira\Tests\Service3(@named(), %%numericExtensionParameter%%, '%%', %%arrayKey.arrayValue%%)
 	- implement: Adeira\Tests\IService5Factory
@@ -23,7 +23,7 @@ services:
 	  	- %%nullExtensionParameter%%
 	named: Adeira\Tests\Service2
 CONFIG;
-        return FileMock::create($config, 'neon');
-    }
+		return FileMock::create($config, 'neon');
+	}
 
 }

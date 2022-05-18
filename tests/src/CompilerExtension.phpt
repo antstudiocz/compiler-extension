@@ -27,11 +27,12 @@ class CompilerExtension extends \Tester\TestCase
 		Tester\Helpers::purge($tempDir = __DIR__ . '/../temp/thread_' . getenv(Tester\Environment::THREAD));
 
 		$configurator = new Nette\Configurator;
-        $configurator->defaultExtensions['extensions'] = [\Adeira\ConfigurableExtensionsExtension::class, [TRUE]];
-        $configurator->defaultExtensions['application'] = [Nette\Bridges\ApplicationDI\ApplicationExtension::class, ['%debugMode%', ['%appDir%'], '%tempDir%/cache']];
-        $configurator->defaultExtensions['http'] = [Nette\Bridges\HttpDI\HttpExtension::class, ['%consoleMode%']];
-        $configurator->defaultExtensions['latte'] = [Nette\Bridges\ApplicationDI\LatteExtension::class, ['%tempDir%/cache/latte', '%debugMode%']];
-        $configurator->defaultExtensions['routing'] = [Nette\Bridges\ApplicationDI\RoutingExtension::class, ['%debugMode%']];
+		$configurator->defaultExtensions['extensions'] = [\Adeira\ConfigurableExtensionsExtension::class, [TRUE]];
+		$config = ['%debugMode%', ['%appDir%'], '%tempDir%/cache'];
+		$configurator->defaultExtensions['application'] = [Nette\Bridges\ApplicationDI\ApplicationExtension::class, $config];
+		$configurator->defaultExtensions['http'] = [Nette\Bridges\HttpDI\HttpExtension::class, ['%consoleMode%']];
+		$configurator->defaultExtensions['latte'] = [Nette\Bridges\ApplicationDI\LatteExtension::class, ['%tempDir%/cache/latte', '%debugMode%']];
+		$configurator->defaultExtensions['routing'] = [Nette\Bridges\ApplicationDI\RoutingExtension::class, ['%debugMode%']];
 		$configurator->setTempDirectory($tempDir);
 		$configurator->addConfig(__DIR__ . '/config.neon');
 		$configurator->onCompile[] = function (Nette\Configurator $sender, Nette\DI\Compiler $compiler) {
@@ -75,24 +76,24 @@ class CompilerExtension extends \Tester\TestCase
 	public function testAddConfigExtensions()
 	{
 		Assert::same([
-            'services' => 'Nette\DI\Extensions\ServicesExtension',
-            'parameters' => 'Nette\DI\Extensions\ParametersExtension',
-            'application' => 'Nette\Bridges\ApplicationDI\ApplicationExtension',
-            'constants' => 'Nette\Bootstrap\Extensions\ConstantsExtension',
-            'search' => 'Nette\DI\Extensions\SearchExtension',
-            'decorator' => 'Nette\DI\Extensions\DecoratorExtension',
-            'di' => 'Nette\DI\Extensions\DIExtension',
-            'extensions' => 'Adeira\ConfigurableExtensionsExtension',
-            'http' => 'Nette\Bridges\HttpDI\HttpExtension',
-            'latte' => 'Nette\Bridges\ApplicationDI\LatteExtension',
-            'php' => 'Nette\Bootstrap\Extensions\PhpExtension',
-            'routing' => 'Nette\Bridges\ApplicationDI\RoutingExtension',
-            'session' => 'Nette\Bridges\HttpDI\SessionExtension',
-            'ext1' => 'Adeira\Tests\CustomExtension1',
-            'ext2' => 'Adeira\Tests\CustomExtension2',
-            'ext3' => 'Adeira\Tests\ExtensionEmptyConfig',
-            'ext4' => 'Adeira\Tests\CustomExtension4',
-            'inject' => 'Nette\DI\Extensions\InjectExtension',
+			'services' => 'Nette\DI\Extensions\ServicesExtension',
+			'parameters' => 'Nette\DI\Extensions\ParametersExtension',
+			'application' => 'Nette\Bridges\ApplicationDI\ApplicationExtension',
+			'constants' => 'Nette\Bootstrap\Extensions\ConstantsExtension',
+			'search' => 'Nette\DI\Extensions\SearchExtension',
+			'decorator' => 'Nette\DI\Extensions\DecoratorExtension',
+			'di' => 'Nette\DI\Extensions\DIExtension',
+			'extensions' => 'Adeira\ConfigurableExtensionsExtension',
+			'http' => 'Nette\Bridges\HttpDI\HttpExtension',
+			'latte' => 'Nette\Bridges\ApplicationDI\LatteExtension',
+			'php' => 'Nette\Bootstrap\Extensions\PhpExtension',
+			'routing' => 'Nette\Bridges\ApplicationDI\RoutingExtension',
+			'session' => 'Nette\Bridges\HttpDI\SessionExtension',
+			'ext1' => 'Adeira\Tests\CustomExtension1',
+			'ext2' => 'Adeira\Tests\CustomExtension2',
+			'ext3' => 'Adeira\Tests\ExtensionEmptyConfig',
+			'ext4' => 'Adeira\Tests\CustomExtension4',
+			'inject' => 'Nette\DI\Extensions\InjectExtension',
 		], array_map(function ($item) {
 			return get_class($item);
 		}, $this->compiler->getExtensions()));
@@ -110,25 +111,25 @@ class CompilerExtension extends \Tester\TestCase
 	{
 		$builder = $this->compiler->getContainerBuilder();
 		Assert::same(
-            [
-                'Nette\DI\Container',
-                'Nette\Application\Application',
-                'Nette\Application\IPresenterFactory',
-                'Nette\Application\LinkGenerator',
-                'Nette\Http\RequestFactory',
-                'Nette\Http\Request',
-                'Nette\Http\Response',
-                'Nette\Bridges\ApplicationLatte\LatteFactory',
-                'Nette\Bridges\ApplicationLatte\TemplateFactory',
-                'Nette\Http\Session',
-                'Adeira\Tests\CommandsStack',
-                'Adeira\Tests\Definition',
-                'Adeira\Tests\Service4', //registered in config.neon
-                'Adeira\Tests\Service2', //overridden (named service)
-                'Nette\Routing\Router',
-                'Adeira\Tests\Service3', //registered later in extension (reregistered after extension parameters eval)
-                'Adeira\Tests\IService5Factory',  //registered later in extension (reregistered after extension parameters eval)
-            ],
+			[
+				'Nette\DI\Container',
+				'Nette\Application\Application',
+				'Nette\Application\IPresenterFactory',
+				'Nette\Application\LinkGenerator',
+				'Nette\Http\RequestFactory',
+				'Nette\Http\Request',
+				'Nette\Http\Response',
+				'Nette\Bridges\ApplicationLatte\LatteFactory',
+				'Nette\Bridges\ApplicationLatte\TemplateFactory',
+				'Nette\Http\Session',
+				'Adeira\Tests\CommandsStack',
+				'Adeira\Tests\Definition',
+				'Adeira\Tests\Service4', //registered in config.neon
+				'Adeira\Tests\Service2', //overridden (named service)
+				'Nette\Routing\Router',
+				'Adeira\Tests\Service3', //registered later in extension (reregistered after extension parameters eval)
+				'Adeira\Tests\IService5Factory',  //registered later in extension (reregistered after extension parameters eval)
+			],
 		array_map(function (Nette\DI\Definitions\Definition $item) {
 			return $item->getType();
 		}, array_values($builder->getDefinitions())));
