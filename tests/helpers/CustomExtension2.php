@@ -6,7 +6,7 @@ namespace Adeira\Tests;
 
 use Tester\FileMock;
 
-class CustomExtension2 extends \Nette\DI\CompilerExtension
+class CustomExtension2 extends \Adeira\CompilerExtension
 {
 
 	public function provideConfig()

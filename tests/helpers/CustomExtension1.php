@@ -47,6 +47,7 @@ CONFIG;
 
 	public function beforeCompile()
 	{
+        parent::beforeCompile();
 		$this->setMapping(['Module' => 'App\*Module\Controllers\*Controller']);
 	}
 

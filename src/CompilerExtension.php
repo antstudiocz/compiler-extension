@@ -5,11 +5,15 @@ declare(strict_types = 1);
 namespace Adeira;
 
 use Nette\Application\IPresenterFactory;
+use Nette\DI\Definitions\Statement;
 
 class CompilerExtension extends \Nette\DI\CompilerExtension
 {
 
-	public function provideConfig()
+    /** @var array */
+    protected $servicesToResolve = [];
+
+    public function provideConfig()
 	{
 	}
 
@@ -36,5 +40,19 @@ class CompilerExtension extends \Nette\DI\CompilerExtension
 		}
 		$builder->getDefinition($presenterFactory)->addSetup('setMapping', [$mapping]);
 	}
+
+    public function beforeCompile()
+    {
+        /** @var Statement $definition */
+        foreach ($this->servicesToResolve as $definition) {
+            $definition = ConfigurableExtensionsExtension::expand($definition, (array) $this->config);
+            $this->loadDefinitionsFromConfig([$definition]);
+        }
+    }
+
+    public function addDefinitionToResolve($name, $definition)
+    {
+        $this->servicesToResolve[$name] = $definition;
+    }
 
 }
