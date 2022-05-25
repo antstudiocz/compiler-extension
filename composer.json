@@ -4,12 +4,12 @@
   "require": {
     "php": "^7.2 || ^8.0",
     "nette/application": "^3",
-    "nette/di": "^3",
-    "nette/bootstrap": "^3.1"
+    "nette/di": "dev-master#ea265b17a2044ec2fc71ea1997d77d03b4c4c6b0",
+    "nette/bootstrap": "^3.1.2"
   },
   "require-dev": {
-    "latte/latte": "^2.4",
-    "nette/tester": "dev-master",
+    "latte/latte": "^3.0 || ^2.4",
+    "nette/tester": "^2.4",
     "slevomat/coding-standard": "^7.0",
     "php-parallel-lint/php-parallel-lint": "^1.3"
   },
@@ -21,6 +21,11 @@
   "autoload-dev": {
     "psr-4": {
       "Adeira\\Tests\\": "tests/helpers/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   }
 }
