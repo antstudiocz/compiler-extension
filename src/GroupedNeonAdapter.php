@@ -1,11 +1,13 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Adeira;
 
-final class GroupedNeonAdapter extends \Nette\DI\Config\Adapters\NeonAdapter
+final class GroupedNeonAdapter extends NeonAdapter
 {
 
-	public function process(array $arr)
+	public function process(array $arr): array
 	{
 		foreach ($arr as &$configKeys) {
 			if (is_array($configKeys)) {
@@ -36,7 +38,7 @@ final class GroupedNeonAdapter extends \Nette\DI\Config\Adapters\NeonAdapter
 		return parent::process($arr);
 	}
 
-	private function isEntityRegisteredAsAnonymous($entityKey)
+	private function isEntityRegisteredAsAnonymous($entityKey): bool
 	{
 		return (string)(int)$entityKey === (string)$entityKey; //anonymous
 	}

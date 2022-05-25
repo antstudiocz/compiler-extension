@@ -1,8 +1,10 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Adeira\Tests;
 
-class CustomExtension4 extends \Nette\DI\CompilerExtension
+class CustomExtension4 extends \Adeira\CompilerExtension
 {
 
 	// Do not use 'provideConfig' here

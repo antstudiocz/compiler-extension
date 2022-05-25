@@ -1,0 +1,36 @@
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}
+    runs-on: macos-latest
+
+#    env:
+#      RUNLEVEL: 0
+
+    strategy:
+      matrix:
+        php: ['8.1', '8.0']
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - run: composer selfupdate 1.10.25 --no-progress
+      - run: composer install
+      - run: vendor/bin/phpcs --standard=ruleset.xml --extensions=php --encoding=utf-8 --tab-width=4 -sp src/ --ignore=bootstrap.php
+      - run: vendor/bin/phpcs --standard=ruleset.xml --extensions=php,phpt --encoding=utf-8 --tab-width=4 -sp tests/
+      - run: vendor/bin/parallel-lint . -e php,php3,php4,php5,phtml,phpt --exclude vendor --blame
+      - run: vendor/bin/tester tests -C
+#      - if: failure()
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: output
+#          path: tests/**/output
+
+
+

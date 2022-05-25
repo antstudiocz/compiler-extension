@@ -1,7 +1,11 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Adeira\Tests;
 
+use Nette\DI\Definitions\Reference;
+use Nette\DI\Definitions\Statement;
 use Tester\Assert;
 use Tester\FileMock;
 
@@ -21,7 +25,7 @@ class ExtensionsManipulation extends \Tester\TestCase
 		$compiler->addExtension('extensions', new \Adeira\ConfigurableExtensionsExtension);
 		$compiler->addConfig([
 			'extensions' => [
-				new class extends \Nette\DI\CompilerExtension {
+				new Statement(Reference::class, [new class extends \Nette\DI\CompilerExtension {
 
 					public function provideConfig()
 					{
@@ -31,8 +35,7 @@ extensions:
 NEON;
 						return FileMock::create($config, 'neon');
 					}
-
-				},
+				}]),
 			],
 		]);
 		Assert::exception(function () use ($compiler) {

@@ -1,10 +1,12 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Adeira;
 
 use Nette;
 
-class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExtension
+class ConfigurableExtensionsExtension extends CompilerExtension
 {
 
 	private $experimental;
@@ -14,9 +16,9 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 		$this->experimental = $experimental;
 	}
 
-	public function loadFromFile($file)
+	public function loadFromFile(string $file): array
 	{
-		$loader = new \Nette\DI\Config\Loader;
+		$loader = new Nette\DI\Config\Loader();
 		if ($this->experimental === TRUE) {
 			$loader->addAdapter('neon', GroupedNeonAdapter::class);
 		}
@@ -28,14 +30,18 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 	public function loadConfiguration()
 	{
 		$ceeConfig = $this->getConfig(); // configuration of this extension (list of extensions)
-
 		foreach ($ceeConfig as $name => $class) {
-			if ($class instanceof Nette\DI\Statement) {
+			$name = is_int($name) ? NULL : $name;
+			if (($class->arguments[0] ?? NULL) instanceof Nette\DI\CompilerExtension) {
+				$extension = $class->arguments[0];
+			} elseif ($class instanceof Nette\DI\Definitions\Statement) {
 				$rc = new \ReflectionClass($class->getEntity());
-				$this->compiler->addExtension($name, $extension = $rc->newInstanceArgs($class->arguments));
+				$extension = $rc->newInstanceArgs($class->arguments);
 			} else {
-				$this->compiler->addExtension($name, $extension = new $class);
+				/** @var Nette\DI\CompilerExtension $extension */
+				$extension = new $class;
 			}
+			$this->compiler->addExtension($name, $extension);
 
 			$builder = $this->getContainerBuilder();
 			$extensionConfigFile = FALSE;
@@ -44,8 +50,11 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 			}
 
 			if ($extensionConfigFile) {
-				$extensionsExtensions = array_keys($this->compiler->getExtensions(\Nette\DI\Extensions\ExtensionsExtension::class));
-
+				if (array_key_exists('extensions', $this->compiler->getExtensions())) {
+					$extensionsExtensions = ['extensions'];
+				} else {
+					$extensionsExtensions = array_keys($this->compiler->getExtensions(\Nette\DI\Extensions\ExtensionsExtension::class));
+				}
 				if (is_array($extensionConfigFile)) {
 					$extensionConfig = $extensionConfigFile;
 				} elseif (is_file($extensionConfigFile)) {
@@ -68,39 +77,17 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 						$builder->parameters
 					);
 				}
-
-				if (isset($extensionConfig['services'])) {
-					$services = $this->expandExtensionParametersInServices(
-						$extensionConfig['services'],
-						$this->compiler->getConfig()[$name] ?? []
-					);
-					$extensionConfig['services'] = $services;
-				}
-
+				$extensionConfig = $this->resolveServicesParameters($extensionConfig, $extension, $name);
 				$this->compiler->addConfig($extensionConfig);
 			}
 		}
 	}
 
 	/**
-	 * Expands %%variables%% in extensions scope.
-	 *
-	 * @throws \Nette\OutOfRangeException
-	 * @throws \Nette\InvalidArgumentException
-	 */
-	private function expandExtensionParametersInServices($services, array $config)
-	{
-		return self::expand($services, $config, TRUE);
-	}
-
-	/**
 	 * Expands %%placeholders%%
-	 *
 	 * @return mixed
-	 *
 	 * @throws Nette\InvalidArgumentException
 	 * @throws Nette\OutOfRangeException
-	 *
 	 * This is basically copy of \Nette\DI\Helpers::expand
 	 */
 	public static function expand($var, array $params, $recursive = FALSE)
@@ -111,8 +98,8 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 				$res[$key] = self::expand($val, $params, $recursive);
 			}
 			return $res;
-		} elseif ($var instanceof Nette\DI\Statement) {
-			return new Nette\DI\Statement(
+		} elseif ($var instanceof Nette\DI\Definitions\Statement) {
+			return new Nette\DI\Definitions\Statement(
 				self::expand($var->getEntity(), $params, $recursive),
 				self::expand($var->arguments, $params, $recursive)
 			);
@@ -155,6 +142,49 @@ class ConfigurableExtensionsExtension extends \Nette\DI\Extensions\ExtensionsExt
 			}
 		}
 		return $res;
+	}
+
+	public function getConfigSchema(): Nette\Schema\Schema
+	{
+		return Nette\Schema\Expect::arrayOf('string|Nette\DI\Definitions\Statement');
+	}
+
+	/**
+	 * @param array $extensionConfig
+	 * @param $extension
+	 * @param $name
+	 * @return array
+	 */
+	public function resolveServicesParameters(array $extensionConfig, $extension, $name): array
+	{
+		if (isset($extensionConfig['services'])) {
+			/** @var Nette\DI\Definitions\Statement $service */
+			foreach ($extensionConfig['services'] as $serviceIndex => $service) {
+				$updateService = FALSE;
+				$arguments = [];
+				if (is_array($service)) {
+					$arguments = $service['arguments'] ?? [];
+				} elseif (is_object($service)) {
+					$arguments = $service->arguments ?? [];
+				}
+				foreach ($arguments as $argument) {
+					if (is_string($argument) && Nette\Utils\Strings::match($argument, '~^%%.*%%$~')) {
+						$updateService = TRUE;
+						break;
+					}
+				}
+				if ($updateService) {
+					if (method_exists($extension, 'addDefinitionToResolve')) {
+						$extension->addDefinitionToResolve($serviceIndex, $service);
+						unset($extensionConfig['services'][$serviceIndex]);
+					} else {
+						$text = "Method 'addDefinitionToResolve' does not exist. Use Adeira\\CompilerExtension for {$name}";
+						throw new \BadMethodCallException($text);
+					}
+				}
+			}
+		}
+		return $extensionConfig;
 	}
 
 }

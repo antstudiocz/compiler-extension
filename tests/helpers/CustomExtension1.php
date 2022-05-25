@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Adeira\Tests;
 
@@ -45,6 +47,7 @@ CONFIG;
 
 	public function beforeCompile()
 	{
+		parent::beforeCompile();
 		$this->setMapping(['Module' => 'App\*Module\Controllers\*Controller']);
 	}
 

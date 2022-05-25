@@ -49,9 +49,9 @@
 	<rule ref="PSR2.Namespaces.NamespaceDeclaration"/>
 
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Arrays/TrailingArrayCommaSniff.php"/>
-	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/UnusedPrivateElementsSniff.php"/>
+<!--	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Classes/UnusedPrivateElementsSniff.php"/>-->
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/ControlStructures/AssignmentInConditionSniff.php"/>
-	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/ControlStructures/YodaComparisonSniff.php"/>
+<!--	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/ControlStructures/YodaComparisonSniff.php"/>-->
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Exceptions/ReferenceThrowableOnlySniff.php"/>
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Namespaces/AlphabeticallySortedUsesSniff.php"/>
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Namespaces/FullyQualifiedExceptionsSniff.php"/>
@@ -59,6 +59,6 @@
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Namespaces/UseFromSameNamespaceSniff.php"/>
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Typehints/DeclareStrictTypesSniff.php"/>
 	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Typehints/ReturnTypehintSpacingSniff.php"/>
-	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Types/EmptyLinesAroundTypeBracesSniff.php"/>
+<!--	<rule ref="./vendor/slevomat/coding-standard/SlevomatCodingStandard/Sniffs/Types/EmptyLinesAroundTypeBracesSniff.php"/>-->
 
 </ruleset>

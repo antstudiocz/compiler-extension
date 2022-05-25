@@ -1,10 +1,12 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types = 1);
 
 namespace Adeira\Tests;
 
 use Tester\FileMock;
 
-class CustomExtension2 extends \Nette\DI\CompilerExtension
+class CustomExtension2 extends \Adeira\CompilerExtension
 {
 
 	public function provideConfig()

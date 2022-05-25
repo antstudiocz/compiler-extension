@@ -12,27 +12,26 @@ require dirname(__DIR__) . '/bootstrap.php';
 /**
  * @testCase
  */
-class UnknownExtensionParameter extends \Tester\TestCase
+class BadExtensionParent extends \Tester\TestCase
 {
 
-	public function testReplaceUnknownExtensionParameter()
+	public function testBadParent()
 	{
 		$compiler = new \Nette\DI\Compiler;
 		$compiler->addExtension('extensions', new \Adeira\ConfigurableExtensionsExtension);
 		$config = <<<NEON
 extensions:
-	ext3: Adeira\Tests\CustomExtension3
+	ext7: Adeira\Tests\CustomExtension7
 NEON;
 		$compiler->loadConfig(FileMock::create($config, 'neon'));
 		Assert::throws(
 			function () use ($compiler) {
 				$compiler->compile();
 			},
-			\OutOfRangeException::class,
-			'Cannot replace %%%%thisExtensionParameterDoesNotExist%%%% because parameter does not exist.'
+			\BadMethodCallException::class
 		);
 	}
 
 }
 
-(new UnknownExtensionParameter)->run();
+(new BadExtensionParent)->run();
