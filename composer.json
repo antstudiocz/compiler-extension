@@ -4,7 +4,7 @@
   "require": {
     "php": "^7.2 || ^8.0",
     "nette/application": "^3",
-    "nette/di": "dev-master#ea265b17a2044ec2fc71ea1997d77d03b4c4c6b0",
+    "nette/di": "v3.0.x-dev",
     "nette/bootstrap": "^3.1.2"
   },
   "require-dev": {

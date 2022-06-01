@@ -6,7 +6,7 @@ namespace Adeira;
 
 use Nette;
 
-class ConfigurableExtensionsExtension extends CompilerExtension
+class ConfigurableExtensionsExtension extends Nette\DI\Extensions\ExtensionsExtension
 {
 
 	private $experimental;
