@@ -2,9 +2,9 @@
   "name": "antstudiocz/compiler-extension",
   "license": "MIT",
   "require": {
-    "php": "^7.2 || ^8.0",
+    "php": "^8.0",
     "nette/application": "^3",
-    "nette/di": "v3.0.x-dev",
+    "nette/di": "^3.0.14",
     "nette/bootstrap": "^3.1.2"
   },
   "require-dev": {
